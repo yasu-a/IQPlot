@@ -10,6 +10,10 @@ dependencies = [
     "tqdm>=4.66,<5",
 ]
 
+[project.scripts]
+step1 = "iq_plot.step1:main"
+step2 = "iq_plot.step2:main"
+
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"

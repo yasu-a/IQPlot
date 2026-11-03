@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from qutip import basis, destroy, sesolve, mesolve, tensor
@@ -6,14 +6,13 @@ from pprint import pprint
 from tqdm.notebook import tqdm
 
 
-OUTPUT_DIR = "./output"
+OUTPUT_DIR = Path(__file__).resolve().parents[2] / "output"
 
 
 def create_output_path(relative_path) -> str:
-    fullpath = os.path.join(OUTPUT_DIR, relative_path)
-    dir_path = os.path.dirname(fullpath)
-    os.makedirs(dir_path, exist_ok=True)
-    return fullpath
+    fullpath = OUTPUT_DIR / relative_path
+    fullpath.parent.mkdir(parents=True, exist_ok=True)
+    return str(fullpath)
 
 
 # --- 読み出し共振器のパラメータ ---
