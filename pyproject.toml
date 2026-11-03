@@ -1,0 +1,18 @@
+[project]
+name = "iq-plot"
+version = "0.1.0"
+description = "QuTiP simulations of resonator dynamics and IQ readout"
+requires-python = ">=3.11"
+dependencies = [
+    "qutip>=5,<6",
+    "numpy>=1.26,<3",
+    "matplotlib>=3.8,<4",
+    "tqdm>=4.66,<5",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["common", "step1", "step2"]
