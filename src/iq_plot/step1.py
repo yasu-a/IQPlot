@@ -1,21 +1,21 @@
-from .common import *
 import numpy as np
-import matplotlib.pyplot as plt
-from qutip import basis, destroy, sesolve, mesolve, tensor
-from pprint import pprint
-from tqdm.notebook import tqdm
+from matplotlib.figure import Figure
+from qutip import sesolve
+from tqdm import tqdm
+
+from .common import create_output_path, h_r, n_r, omega, psi_r0, x_r
 
 
 # --- シミュレーション条件 ---
 drive_frequencies = [0.8, 0.9, 0.99, 1.0, 1.01, 1.1, 1.2]  # 駆動周波数 [GHz]
-times = np.linspace(0, 10, 1001)    # 時間 [ns]
+times = np.linspace(0, 10, 10001)    # 時間 [ns]
 
 # --- 時間依存ハミルトニアン ---
 
 
-def drive_coefficient(t, args):
+def drive_coefficient(t, omega_d):
     """マイクロ波駆動の時間依存係数を返す。"""
-    return np.cos(args["omega_d"] * t)
+    return np.cos(omega_d * t)
 
 
 h_t = [h_r, [omega * x_r, drive_coefficient]]
@@ -24,7 +24,7 @@ h_t = [h_r, [omega * x_r, drive_coefficient]]
 def main() -> None:
     results = {}
 
-    for f_d in drive_frequencies:
+    for f_d in tqdm(drive_frequencies):
         result = sesolve(
             h_t,
             psi_r0,
@@ -42,7 +42,8 @@ def main() -> None:
         results[f_d] = result.expect[0]
 
     # --- プロット ---
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig = Figure(figsize=(8, 5))
+    ax = fig.subplots()
 
     for f_d in drive_frequencies:
         ax.plot(
@@ -58,7 +59,7 @@ def main() -> None:
     ax.grid(alpha=0.3)
 
     fig.tight_layout()
-    fig.savefig(create_output_path("step1-timeevol.png"))
+    fig.savefig(create_output_path("step1_timeevol.png"))
 
 
 if __name__ == "__main__":

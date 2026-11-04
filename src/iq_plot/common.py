@@ -1,9 +1,7 @@
 from pathlib import Path
+
 import numpy as np
-import matplotlib.pyplot as plt
-from qutip import basis, destroy, sesolve, mesolve, tensor
-from pprint import pprint
-from tqdm.notebook import tqdm
+from qutip import basis, destroy
 
 
 OUTPUT_DIR = Path(__file__).resolve().parents[2] / "output"

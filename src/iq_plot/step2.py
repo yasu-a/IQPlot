@@ -1,13 +1,25 @@
-from .common import *
-from .step1 import drive_frequencies, h_t, drive_coefficient
 import numpy as np
 import matplotlib.pyplot as plt
-from qutip import basis, destroy, sesolve, mesolve, tensor
-from pprint import pprint
+from matplotlib.figure import Figure
+from qutip import basis, destroy, mesolve
 from tqdm import tqdm
 
+from .common import (
+    a_r,
+    create_output_path,
+    f_r,
+    kappa,
+    n_fock,
+    n_r,
+    omega,
+    omega_r,
+    psi_r0,
+)
+from .step1 import drive_coefficient, drive_frequencies, h_t
 
 # --- シミュレーション条件 ---
+
+
 def main() -> None:
     drive_frequencies_step2 = np.linspace(
         min(drive_frequencies), max(drive_frequencies), 11)
@@ -74,7 +86,7 @@ def main() -> None:
     result_check = mesolve(
         h_check,
         basis(n_fock_check, 0),
-        [0, t_end],
+        times_step2,
         c_ops=[np.sqrt(kappa) * a_check],
         e_ops=[n_check],
         args={"omega_d": 2 * np.pi * f_res},
@@ -102,7 +114,8 @@ def main() -> None:
         print("注意: Fock空間の次元を増やしてください。")
 
     # --- プロット ---
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig = Figure(figsize=(8, 5))
+    ax = fig.subplots()
 
     for f_d in drive_frequencies_step2:
         ax.plot(
@@ -119,6 +132,51 @@ def main() -> None:
 
     fig.tight_layout()
     fig.savefig(create_output_path("step2_timeevol.png"))
+
+    # --- 周波数応答 ---
+    final_photon_numbers = np.array([
+        results_step2[f_d][-1] for f_d in drive_frequencies_step2
+    ])
+
+    # --- ローレンツ曲線 ---
+    f_lorentz = np.linspace(
+        min(drive_frequencies_step2),
+        max(drive_frequencies_step2),
+        401,
+    )
+
+    omega_d_lorentz = 2 * np.pi * f_lorentz
+
+    lorentzian = (omega / 2) ** 2 / (
+        (omega_d_lorentz - omega_r) ** 2 + (kappa / 2) ** 2
+    )
+
+    # --- プロット ---
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    ax.plot(
+        drive_frequencies_step2,
+        final_photon_numbers,
+        marker="o",
+        markersize=3,
+        label="QuTiP (final time)",
+    )
+
+    ax.plot(
+        f_lorentz,
+        lorentzian,
+        "--",
+        label="Lorentzian (RWA)",
+    )
+
+    ax.set_xlabel("Drive frequency [GHz]")
+    ax.set_ylabel("Mean photon number [photons]")
+    ax.set_title("Resonator frequency response (with damping)")
+    ax.legend()
+    ax.grid(alpha=0.3)
+
+    fig.tight_layout()
+    fig.savefig(create_output_path("step2_spectrum.png"))
 
 
 if __name__ == "__main__":
